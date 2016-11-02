@@ -1,65 +1,52 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/dir.h>
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
 #include <fcntl.h>
-#include <time.h>
 #include <dirent.h>
+#include <string.h>
 
-typedef struct stat* sp;
 
-/*
-int printDir(DIR* dirStream)
-{
+typedef struct stat sp;
+
+int printDir(DIR *dirStream) {
 	int acc = 0;
-	while(dirStream)
-	{
-		DIR* status = opendir(dirStream);
-		if(status) printDir(opendir(dirStream));
-		else
-		{
-			struct dirent* thisFile = readdir(dirStream);
-			printf("%s\n", thisFile->d_name);
-			sp fileStats = (sp) malloc(sizeof(sp));
-			stat(thisFile->d_name, fileStats);
-			acc += fileStats->st_size;
-		}
-	}
-	return acc;
-}
-*/
-
-int printDir(DIR* dirStream)
-{
-	int acc = 0;
-	struct dirent* thisFile = readdir(dirStream);
+	struct dirent *thisFile;
+    char directories[100];
+    char file[100];
+    char name[256];
+    thisFile = readdir(dirStream);
 	while(thisFile)
-	{
-		printf("%s\n", thisFile->d_name);
-        printf("%d  ", thisFile->d_type);
-		if(thisFile->d_type == 4) acc += printDir(opendir(thisFile->d_name)); //look at this
-
-		else
-		{
-			sp fileStats = (sp) malloc(sizeof(sp));
-			stat(thisFile->d_name, fileStats);
-			acc += fileStats->st_size;
-			free(fileStats);
+    {
+        strcpy(name, thisFile->d_name);
+		if(thisFile->d_type & DT_DIR){
+            strcat(name, "\n");
+            strcat(directories, "  ");
+            strcat(directories, name);
+        } else if(thisFile->d_type & DT_REG){
+			sp fileStats;
+			stat(name, &fileStats);
+            printf("%lld  ", fileStats.st_size);
+			acc += fileStats.st_size;
+            strcat(name, "\n");
+            strcat(file, "  ");
+            strcat(file, name);
 		}
-        
-		thisFile = readdir(dirStream);
+        thisFile = readdir(dirStream);
 	}
+    free(thisFile);
 	closedir(dirStream);
+    printf("\nDirectories:\n%s\nFiles:\n%s\n", directories, file);
 	return acc;
 }
 
 
 int main () {
-
-	DIR* dirStream = opendir("../systems-05dir");
+	DIR *dirStream = opendir(".");
 	int normalSize = printDir(dirStream);
-	printf("size of files: %d\n", normalSize);
+	printf("Size of all files combined: %d bytes\n\n", normalSize);
 }
