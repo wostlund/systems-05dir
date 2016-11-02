@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <sys/dir.h>
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
@@ -38,7 +39,8 @@ int printDir(DIR* dirStream)
 	while(thisFile)
 	{
 		printf("%s\n", thisFile->d_name);
-		if(thisFile->d_type == 4) printDir(opendir(thisFile->d_name)); //look at this
+        printf("%d  ", thisFile->d_type);
+		if(thisFile->d_type == 4) acc += printDir(opendir(thisFile->d_name)); //look at this
 
 		else
 		{
@@ -47,6 +49,7 @@ int printDir(DIR* dirStream)
 			acc += fileStats->st_size;
 			free(fileStats);
 		}
+        
 		thisFile = readdir(dirStream);
 	}
 	closedir(dirStream);
