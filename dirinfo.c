@@ -39,7 +39,7 @@ int printDir(DIR *dirStream) {
     }
   free(thisFile);
   closedir(dirStream);
-  printf("\nDirectories:\n%s\nFiles:\n%s\n", directories, file);
+  printf("\nDirectories:\n%s\nRegular Files:\n%s\n", directories, file);
   return acc;
 }
 
